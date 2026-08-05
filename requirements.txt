@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+langserve[all]
+
+langchain
+langchain-core
+langchain-community
+langchain-google-genai
+google-genai
+langchain-text-splitters
+
+faiss-cpu
+
+pydantic
+requests
