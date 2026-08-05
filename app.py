@@ -116,10 +116,21 @@ runnable = (
 # 5. FastAPI
 # =====================================================
 
+
+
 app = FastAPI(
     title="RAG API",
     version="1.0",
 )
+
+@app.get("/")
+def home():
+    return {
+        "message": "RAG API is running successfully!",
+        "docs": "/docs",
+        "playground": "/rag/playground",
+        "invoke": "/rag/invoke"
+    }
 
 add_routes(
     app,
