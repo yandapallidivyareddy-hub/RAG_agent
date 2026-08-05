@@ -10,7 +10,7 @@ from langchain.tools import tool
 from langchain.agents import create_agent
 from langserve import add_routes
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain.memory import ChatMessageHistory
+from langchain_core.chat_history import InMemoryChatMessageHistory
 
 # 9. Initialize FastAPI app globally
 app = FastAPI(
