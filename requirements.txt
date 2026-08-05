@@ -1,0 +1,15 @@
+langchain-google-genai
+langchain-community
+langchain
+sentence-transformers
+faiss-cpu
+langchain-chroma
+langchain_text_splitters
+langchain-core
+langserve[all]
+uvicorn
+nest_asyncio
+fastapi
+requests
+pydantic
+duckduckgo-search
