@@ -1,15 +1,16 @@
-fastapi
-uvicorn
-langserve[all]
+fastapi==0.116.1
+uvicorn==0.35.0
 
-langchain
-langchain-core
-langchain-community
-langchain-google-genai
-google-genai
-langchain-text-splitters
+langserve[all]==0.3.1
 
-faiss-cpu
+langchain==0.3.27
+langchain-core==0.3.74
+langchain-community==0.3.29
+langchain-google-genai==2.1.10
+google-genai==1.33.0
+langchain-text-splitters==0.3.9
 
-pydantic
-requests
+faiss-cpu==1.12.0
+
+pydantic==2.11.7
+requests==2.32.5
