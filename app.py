@@ -136,8 +136,23 @@ rag_chain = (
 class RAGInput(BaseModel):
     input: str = Field(description="User Question")
 
+# robust extractor: handle dicts, pydantic models, or raw strings
+def _extract_input(x):
+    # if FastAPI or langserve passes a dict
+    if isinstance(x, dict):
+        # prefer 'input' key, fall back to common alternatives
+        return x.get("input") or x.get("question") or x
+    # pydantic BaseModel or object with attribute
+    if hasattr(x, "input"):
+        return getattr(x, "input")
+    # if already a string
+    if isinstance(x, str):
+        return x
+    # last resort: return as-is
+    return x
+
 runnable = (
-    RunnableLambda(lambda x: x.input)
+    RunnableLambda(_extract_input)
     | rag_chain
 ).with_types(
     input_type=RAGInput,
