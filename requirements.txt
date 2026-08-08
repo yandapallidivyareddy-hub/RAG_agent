@@ -1,14 +1,19 @@
-fastapi
-uvicorn
+# Pinned (or minimum) requirements that are more stable on Render.
+# If you run into build errors for faiss-cpu, try switching to Chromadb or another vectorstore.
+fastapi>=0.95.0
+uvicorn[standard]>=0.22.0
 
-langserve[all]
+# LangServe / LangChain ecosystem
+langserve[all]>=0.3.0
+langchain>=0.0.320
+langchain-core>=0.0.320
+langchain-community>=0.0.5
+langchain-google-genai>=0.3.0
+google-genai>=0.6.0
+langchain-text-splitters>=0.0.9
 
-langchain
-langchain-core
-langchain-community
-langchain-google-genai
-google-genai
-langchain-text-splitters
+# Vector store
+faiss-cpu>=1.7.4
 
-faiss-cpu
-requests
+# Utilities
+requests>=2.31.0
