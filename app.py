@@ -17,7 +17,7 @@ from langchain_google_genai import (
 )
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import FAISS
+from langchain.vectorstores import Chroma
 
 # configure logging
 logging.basicConfig(level=logging.INFO)
@@ -117,8 +117,13 @@ splitter = RecursiveCharacterTextSplitter(
 
 docs = splitter.split_documents(documents)
 
-# FAISS can fail to install on some hosts; keep this call but check deploy logs if it errors
-vectorstore = FAISS.from_documents(docs, embeddings)
+# Use Chroma (Chromadb) instead of FAISS for easier deployment on Render
+# Chroma stores vectors in-memory by default; you can configure persistence with persist_directory
+try:
+    vectorstore = Chroma.from_documents(docs, embeddings)
+except Exception as e:
+    # provide a clear error if chroma fails to initialize
+    raise RuntimeError(f"Failed to initialize Chroma vectorstore: {e}") from e
 
 retriever = vectorstore.as_retriever(search_kwargs={"k": 2})
 
