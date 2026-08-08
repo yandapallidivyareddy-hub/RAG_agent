@@ -81,7 +81,7 @@ SKILLS
 •  Java •  Python •  C Programming
 •  SQL •  MySQL •  VS Code
 •  Google Colab •  Git •  GitHub
-•  Pandas •  NumPy •  Matplotlib
+•  Pandas • NumPy •  Matplotlib
 •  Seaborn •  Streamlit •  Data Analytics
 •  Deep Learning •  Data Visualization •  Data Preprocessing
 •  Problem Solving •  Analytical Thinking •  Presentation skills
@@ -137,7 +137,7 @@ class RAGInput(BaseModel):
     input: str = Field(description="User Question")
 
 runnable = (
-    RunnableLambda(lambda x: x["input"])
+    RunnableLambda(lambda x: x.input)
     | rag_chain
 ).with_types(
     input_type=RAGInput,
