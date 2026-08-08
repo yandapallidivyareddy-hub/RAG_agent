@@ -1,4 +1,5 @@
 import os
+import logging
 import uvicorn
 
 from fastapi import FastAPI
@@ -18,25 +19,42 @@ from langchain_google_genai import (
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 
+# configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # =====================================================
-# 1. Gemini API
+# 1. Gemini / Google GenAI API
 # =====================================================
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-
 if not GOOGLE_API_KEY:
     raise ValueError("GOOGLE_API_KEY environment variable is not set.")
 
-llm = ChatGoogleGenerativeAI(
-    model="models/gemini-2.5-flash",
-    google_api_key=GOOGLE_API_KEY,
-    temperature=0,
-)
+# allow model selection via environment with safe defaults
+MODEL_NAME = os.getenv("MODEL_NAME", "models/chat-bison-001")
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "textembedding-gecko-001")
 
-embeddings = GoogleGenerativeAIEmbeddings(
-    model="gemini-embedding-001",
-    google_api_key=GOOGLE_API_KEY,
-)
+# initialize LLM and embeddings with clear errors
+try:
+    logger.info("Initializing LLM model=%s", MODEL_NAME)
+    llm = ChatGoogleGenerativeAI(
+        model=MODEL_NAME,
+        google_api_key=GOOGLE_API_KEY,
+        temperature=0,
+    )
+except Exception as e:
+    # raise a clearer error so renders logs show the model/access issue immediately
+    raise RuntimeError(f"Failed to initialize ChatGoogleGenerativeAI with model={MODEL_NAME}: {e}") from e
+
+try:
+    logger.info("Initializing embeddings model=%s", EMBEDDING_MODEL)
+    embeddings = GoogleGenerativeAIEmbeddings(
+        model=EMBEDDING_MODEL,
+        google_api_key=GOOGLE_API_KEY,
+    )
+except Exception as e:
+    raise RuntimeError(f"Failed to initialize GoogleGenerativeAIEmbeddings with model={EMBEDDING_MODEL}: {e}") from e
 
 # =====================================================
 # 2. Knowledge Base
@@ -99,6 +117,7 @@ splitter = RecursiveCharacterTextSplitter(
 
 docs = splitter.split_documents(documents)
 
+# FAISS can fail to install on some hosts; keep this call but check deploy logs if it errors
 vectorstore = FAISS.from_documents(docs, embeddings)
 
 retriever = vectorstore.as_retriever(search_kwargs={"k": 2})
@@ -138,10 +157,11 @@ class RAGInput(BaseModel):
 
 # robust extractor: handle dicts, pydantic models, or raw strings
 def _extract_input(x):
+    logger.debug("_extract_input received type=%s value=%r", type(x), x)
     # if FastAPI or langserve passes a dict
     if isinstance(x, dict):
-        # prefer 'input' key, fall back to common alternatives
-        return x.get("input") or x.get("question") or x
+        # prefer 'input' key, fall back to common alternatives, or return the whole dict
+        return x.get("input") or x.get("question") or x.get("q") or x
     # pydantic BaseModel or object with attribute
     if hasattr(x, "input"):
         return getattr(x, "input")
